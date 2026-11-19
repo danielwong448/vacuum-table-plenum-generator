@@ -1,6 +1,6 @@
 # Vacuum Table Plenum Generator
 
-A zero-build, portable web application for designing a 4-quadrant CNC vacuum table plenum from 3/4" MDF and generating clean GRBL v1.1 G-code, featuring live 2D and hardware-accelerated WebGL 3D previews.
+A lightweight web application for designing a 4-quadrant CNC vacuum table plenum from 3/4" MDF and generating G-code, featuring live 2D and 3D previews.
 
 ## Features
 
@@ -17,15 +17,6 @@ A zero-build, portable web application for designing a 4-quadrant CNC vacuum tab
   1. Outside perimeter rectangle for each quadrant (`FL` → `FR` → `BR` → `BL`)
   2. Four cut-through inlet holes (`G3` arcs, with optional holding tabs)
   3. Quadrant-by-quadrant: straight vertical slots → horizontal slots → recessed flange pad clearing
-
-## Usage
-
-### Run Standalone (Local) or Host on GitHub Pages
-
-No build tools, npm install, or external JS libraries are required:
-
-- **Local**: Open `index.html` directly in any modern browser (`file://`).
-- **GitHub Pages**: Push the directory contents to a repository and enable GitHub Pages on the root (`/`) branch.
 
 ## GRBL Machine Setup
 
