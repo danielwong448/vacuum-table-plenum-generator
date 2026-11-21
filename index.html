@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-ui-size="regular">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vacuum Table Plenum Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Outfit:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-header">
+        <div class="brand">
+          <div class="menu-anchor">
+            <button
+              type="button"
+              id="btn-app-menu"
+              class="icon-menu-btn"
+              aria-haspopup="true"
+              aria-expanded="false"
+              title="Menu & Settings"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="6" x2="20" y2="6"></line>
+                <line x1="4" y1="12" x2="20" y2="12"></line>
+                <line x1="4" y1="18" x2="20" y2="18"></line>
+              </svg>
+            </button>
+
+            <div id="app-menu-dropdown" class="menu-dropdown is-hidden" role="menu">
+              <div class="menu-group">
+                <div class="menu-group-label">Plenum Design</div>
+                <button type="button" id="btn-save-design" class="menu-item" role="menuitem">
+                  Save Plenum Design (.json)
+                </button>
+                <button type="button" id="btn-load-design" class="menu-item" role="menuitem">
+                  Load Plenum Design (.json)
+                </button>
+                <input
+                  id="inp-load-design"
+                  type="file"
+                  accept=".json,application/json"
+                  class="is-hidden"
+                />
+                <button type="button" id="btn-reset" class="menu-item" role="menuitem">
+                  Reset Defaults
+                </button>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <div class="menu-group">
+                <div class="menu-group-label">Preferences</div>
+                <label class="menu-toggle-row">
+                  <span>Dark Mode</span>
+                  <input id="chk-dark-mode" type="checkbox" />
+                </label>
+
+                <div class="menu-seg-row">
+                  <span>Element Size</span>
+                  <div class="segmented segmented-xs" role="group" aria-label="Interface Size">
+                    <button type="button" id="btn-size-small" class="seg-btn" data-ui-size="small">Small</button>
+                    <button type="button" id="btn-size-regular" class="seg-btn is-active" data-ui-size="regular">
+                      Regular
+                    </button>
+                  </div>
+                </div>
+
+                <div class="menu-seg-row">
+                  <span>Units</span>
+                  <div class="segmented segmented-xs" role="group" aria-label="Display Units">
+                    <button type="button" id="btn-units-in" class="seg-btn is-active" data-units="in">in</button>
+                    <button type="button" id="btn-units-mm" class="seg-btn" data-units="mm">mm</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9">
+              <rect x="3" y="3" width="18" height="18" rx="2.5"></rect>
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <circle cx="7.5" cy="7.5" r="1.4" fill="currentColor" stroke="none"></circle>
+              <circle cx="16.5" cy="7.5" r="1.4" fill="currentColor" stroke="none"></circle>
+              <circle cx="7.5" cy="16.5" r="1.4" fill="currentColor" stroke="none"></circle>
+              <circle cx="16.5" cy="16.5" r="1.4" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </div>
+          <h1>Vacuum Table Plenum Generator</h1>
+        </div>
+        <div class="header-actions">
+          <div class="menu-anchor">
+            <button
+              type="button"
+              id="btn-export-menu"
+              class="btn btn-secondary"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Export ▾
+            </button>
+            <div id="export-menu-dropdown" class="menu-dropdown menu-dropdown-right is-hidden" role="menu">
+              <div class="menu-group">
+                <div class="menu-group-label">CAD &amp; Design</div>
+                <button type="button" id="btn-export-step" class="menu-item" role="menuitem">
+                  Export STEP 3D Model (.step)
+                </button>
+                <button type="button" id="btn-export-dxf" class="menu-item" role="menuitem">
+                  Export Top-View DXF (.dxf)
+                </button>
+                <button type="button" id="btn-export-json" class="menu-item" role="menuitem">
+                  Save Plenum Design (.json)
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="button" id="btn-preview-gcode" class="btn btn-secondary">Preview G-Code</button>
+          <button type="button" id="btn-download-gcode" class="btn btn-primary">Download .nc</button>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <aside class="sidebar" aria-label="Plenum Configuration">
+          <form id="config-form" autocomplete="off">
+            <!-- Section 1: Sheet & Margin -->
+            <section class="panel-section">
+              <div class="section-head">
+                <h2>Sheet &amp; Margin</h2>
+              </div>
+
+              <div class="field-grid cols-3">
+                <label class="field">
+                  <span>Width <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-sheet-width" type="number" step="0.125" min="10" max="6000" />
+                </label>
+                <label class="field">
+                  <span>Length <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-sheet-length" type="number" step="0.125" min="10" max="6000" />
+                </label>
+                <label class="field">
+                  <span>Thick <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-sheet-thickness" type="number" step="0.0625" min="0.1" max="200" />
+                </label>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Outer Margin <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-outer-margin" type="number" step="0.125" min="0" max="500" />
+                </label>
+                <label class="field">
+                  <span>Zone Divider <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-center-divider" type="number" step="0.125" min="0" max="500" />
+                </label>
+              </div>
+
+              <label class="checkbox-row">
+                <input id="chk-link-divider" type="checkbox" checked />
+                <span>Match center zone divider to outer margin</span>
+              </label>
+
+              <div id="readout-divider-override" class="info-note is-hidden"></div>
+            </section>
+
+            <!-- Section 2: Tool & Grid -->
+            <section class="panel-section">
+              <div class="section-head">
+                <h2>Tool &amp; Grid</h2>
+                <span class="hint-text" id="readout-depth-mm">9.53 mm depth</span>
+              </div>
+
+              <div class="field">
+                <span>End Mill Diameter</span>
+                <div class="segmented" role="group" aria-label="End Mill Size">
+                  <button type="button" id="btn-tool-025" class="seg-btn is-active" data-tool="0.25">
+                    1/4" (0.250")
+                  </button>
+                  <button type="button" id="btn-tool-0375" class="seg-btn" data-tool="0.375">
+                    3/8" (0.375")
+                  </button>
+                </div>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Channel Depth <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-channel-depth" type="number" step="0.025" min="0.05" max="100" />
+                </label>
+                <div class="field">
+                  <span>Grid Summary</span>
+                  <div class="static-pill" id="readout-grid-summary">9V × 19H / quad</div>
+                </div>
+              </div>
+
+              <div class="stepper-list">
+                <div class="stepper-row">
+                  <span class="stepper-label">Vertical Grid Lines / Quad</span>
+                  <div class="stepper-ctrl">
+                    <button type="button" id="btn-vert-dec" class="step-btn" aria-label="Decrease vertical lines">−</button>
+                    <input id="inp-vert-lines" type="number" min="0" max="60" step="1" />
+                    <button type="button" id="btn-vert-inc" class="step-btn" aria-label="Increase vertical lines">+</button>
+                  </div>
+                </div>
+                <div class="stepper-row">
+                  <span class="stepper-label">Horizontal Grid Lines / Quad</span>
+                  <div class="stepper-ctrl">
+                    <button type="button" id="btn-horiz-dec" class="step-btn" aria-label="Decrease horizontal lines">−</button>
+                    <input id="inp-horiz-lines" type="number" min="0" max="120" step="1" />
+                    <button type="button" id="btn-horiz-inc" class="step-btn" aria-label="Increase horizontal lines">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-note" id="readout-pad-size">Pad Size: —</div>
+
+              <label class="checkbox-row">
+                <input id="chk-square-pads" type="checkbox" />
+                <span>1:1 square pad ratio (override zone dividers)</span>
+              </label>
+            </section>
+
+            <!-- Section 3: Inlet Holes -->
+            <section class="panel-section">
+              <div class="section-head">
+                <h2>Inlet Holes</h2>
+                <button type="button" id="btn-center-holes" class="btn-link">Center Holes</button>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Hole Diameter <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-inlet-diameter" type="number" step="0.125" min="0.3" max="400" />
+                </label>
+                <label class="field">
+                  <span>Cut-Through Depth <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-inlet-cut-depth" type="number" step="0.01" min="0.05" max="200" />
+                </label>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Flange Clear Radius <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-flange-radius" type="number" step="0.125" min="0" max="400" />
+                </label>
+                <label class="field">
+                  <span>Pocket Depth <em class="unit-lbl">(in)</em></span>
+                  <input id="inp-flange-pocket-depth" type="number" step="0.025" min="0.05" max="100" />
+                </label>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Pocket Stepover (mm)</span>
+                  <input id="inp-pocket-stepover" type="number" step="0.5" min="0.5" max="25" />
+                </label>
+                <div class="field">
+                  <span>Cleared Pads</span>
+                  <div class="static-pill" id="readout-flange-pads">—</div>
+                </div>
+              </div>
+
+              <label class="checkbox-row">
+                <input id="chk-inlet-tabs" type="checkbox" />
+                <span>Leave 4 holding tabs (2mm × 2mm)</span>
+              </label>
+
+              <div class="info-note">Click blue dimensions on the 2D view to position holes.</div>
+            </section>
+
+            <!-- Section 4: Cutting Parameters -->
+            <section class="panel-section">
+              <div class="section-head">
+                <h2>Cutting Parameters</h2>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Spindle RPM</span>
+                  <input id="inp-rpm" type="number" step="500" min="1000" max="40000" />
+                </label>
+                <label class="field">
+                  <span>Feed Rate (mm/min)</span>
+                  <input id="inp-feed-rate" type="number" step="100" min="100" max="15000" />
+                </label>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Stepdown (mm/pass)</span>
+                  <input id="inp-stepdown" type="number" step="0.5" min="0.5" max="25" />
+                </label>
+                <label class="field">
+                  <span>Plunge Rate (mm/min)</span>
+                  <input id="inp-plunge-rate" type="number" step="50" min="50" max="6000" />
+                </label>
+              </div>
+
+              <div class="field-grid cols-2">
+                <label class="field">
+                  <span>Safe Z (mm)</span>
+                  <input id="inp-safe-z" type="number" step="1" min="2" max="50" />
+                </label>
+                <label class="field">
+                  <span>Grid Ramp Angle (°)</span>
+                  <input id="inp-ramp-angle" type="number" step="5" min="5" max="90" />
+                </label>
+              </div>
+            </section>
+          </form>
+        </aside>
+
+        <section class="workspace" aria-label="2D and 3D Preview and G-Code Output">
+          <div class="workspace-bar">
+            <div class="view-tabs" role="tablist">
+              <button type="button" id="tab-2d" class="tab-btn is-active" role="tab" aria-selected="true">
+                2D &amp; 3D View
+              </button>
+              <button type="button" id="tab-gcode" class="tab-btn" role="tab" aria-selected="false">
+                G-Code
+              </button>
+            </div>
+
+            <div class="toolbar-controls" id="toolbar-2d">
+              <label class="toggle-chip">
+                <input id="chk-show-dimensions" type="checkbox" checked />
+                <span>Dimensions</span>
+              </label>
+              <label class="toggle-chip">
+                <input id="chk-show-toolpath" type="checkbox" />
+                <span>Toolpath Order</span>
+              </label>
+              <div class="zoom-group" role="group" aria-label="2D Zoom Controls">
+                <button type="button" id="btn-zoom-out" class="zoom-btn" title="Zoom Out">−</button>
+                <button type="button" id="btn-zoom-fit" class="zoom-btn zoom-fit" title="Fit Sheet">Fit</button>
+                <button type="button" id="btn-zoom-in" class="zoom-btn" title="Zoom In">+</button>
+              </div>
+            </div>
+
+            <div class="toolbar-controls is-hidden" id="toolbar-gcode">
+              <span class="gcode-meta-label" id="gcode-meta-badge">G21 Metric</span>
+              <button type="button" id="btn-copy-gcode" class="btn btn-secondary btn-sm">Copy G-Code</button>
+            </div>
+          </div>
+
+          <div id="validation-banner" class="validation-banner is-hidden" role="alert"></div>
+
+          <div id="panel-2d" class="viewer-split">
+            <div class="pane-2d">
+              <svg id="canvas-svg" xmlns="http://www.w3.org/2000/svg" aria-label="2D Vacuum Plenum Layout"></svg>
+
+              <!-- Floating Click-to-Edit Dimension Popover -->
+              <div id="dim-editor-popover" class="dim-popover is-hidden" role="dialog" aria-label="Edit Dimension">
+                <div class="dim-popover-title" id="dim-popover-title">Edit Dimension</div>
+                <div class="dim-popover-row">
+                  <input id="inp-dim-popover" type="number" step="any" />
+                  <span id="dim-popover-unit" class="dim-popover-unit">in</span>
+                  <button type="button" id="btn-dim-apply" class="btn btn-primary btn-sm">Apply</button>
+                  <button type="button" id="btn-dim-cancel" class="btn btn-ghost btn-sm">✕</button>
+                </div>
+                <label id="dim-popover-sym-wrap" class="checkbox-row dim-popover-sym">
+                  <input id="chk-dim-symmetric" type="checkbox" checked />
+                  <span>Keep F/B symmetric about center</span>
+                </label>
+              </div>
+
+              <!-- Two-Row Fixed-Width Playback Bar -->
+              <div class="playback-bar" aria-label="Toolpath Playback">
+                <div class="playback-row-top">
+                  <button type="button" id="btn-play-pause" class="play-btn" title="Play Toolpath Sequence">
+                    Play
+                  </button>
+                  <input
+                    id="inp-playback"
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value="1000"
+                    aria-label="Toolpath progress"
+                  />
+                </div>
+                <div id="playback-status" class="playback-status">
+                  Order: 1. Perimeters → 2. Inlets → 3. Q1–Q4 Vert → Horiz
+                </div>
+              </div>
+            </div>
+
+            <div class="pane-3d">
+              <div class="pane-3d-head">
+                <span class="pane-3d-title">Live 3D Preview</span>
+                <div class="zoom-group" role="group" aria-label="3D Camera Views">
+                  <button type="button" id="btn-3d-iso" class="zoom-btn">Iso</button>
+                  <button type="button" id="btn-3d-top" class="zoom-btn">Top</button>
+                  <button type="button" id="btn-3d-inlet" class="zoom-btn">Inlet</button>
+                </div>
+              </div>
+              <div class="pane-3d-canvas-wrap">
+                <canvas id="canvas-3d" aria-label="3D Vacuum Plenum Preview"></canvas>
+                <div class="pane-3d-hint">Drag to orbit · Scroll to zoom · Shift+drag to pan</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-gcode" class="gcode-stage is-hidden">
+            <div class="gcode-sections" id="gcode-sections" aria-label="G-Code Sections"></div>
+            <pre id="gcode-preview" class="gcode-pre"></pre>
+          </div>
+
+          <footer class="status-strip">
+            <span id="stat-sheet">49" × 97" × 0.75" MDF</span>
+            <span class="sep">·</span>
+            <span id="stat-quad">Quadrants: 22.25" × 46.25" cut</span>
+            <span class="sep">·</span>
+            <span id="stat-runtime">Est. Time: —</span>
+            <span class="sep">·</span>
+            <span id="stat-lines">Lines: —</span>
+            <span class="status-right is-hidden" id="stat-health"></span>
+          </footer>
+        </section>
+      </main>
+    </div>
+
+    <script defer src="js/geometry.js"></script>
+    <script defer src="js/gcode.js"></script>
+    <script defer src="js/renderer.js"></script>
+    <script defer src="js/preview3d.js"></script>
+    <script defer src="js/dxf.js"></script>
+    <script defer src="js/step.js"></script>
+    <script defer src="js/app.js"></script>
+  </body>
+</html>
